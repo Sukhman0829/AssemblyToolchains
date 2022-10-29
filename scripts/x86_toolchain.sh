@@ -16,10 +16,10 @@ if [ $# -lt 1 ]; then # if no option is selected the user guide is printed
         echo "-b | --break <break point>    Add breakpoint after running gdb. Default is _start."
         echo "-r | --run                    Run program in gdb automatically. Same as run command inside gdb env."
         echo "-q | --qemu                   Run executable in QEMU emulator. This will execute the program."
-        echo "-32| --x86-32                 Compile for 32bit (x86-32) system."
+        echo "-32| --x86-32                 Compile for 32bit (x86-32) system and 64bit for (x86_64)system."
         echo "-o | --output <filename>      Output filename."
 
-        exit 1 # after printing the guide the program will exit
+        exit 1 # after printing the program will exit
 fi # closes the above if statement
 
 # setting default parameters
@@ -111,12 +111,12 @@ fi
 
 if [ "$BITS" == "True" ]; then # if BITS is true, then nasm will compile the file in 64 bit mode
 
-        nasm -f elf64 $1 -o $OUTPUT_FILE.o && echo "" # object file is created
+        nasm -f elf64 $1 -o $OUTPUT_FILE.o && echo "" # object file is created in 64 bit mode
 
 
 elif [ "$BITS" == "False" ]; then # if BITS is false, then nasm will compile file in 32 bit mode
 
-        nasm -f elf $1 -o $OUTPUT_FILE.o && echo "" # object file is created
+        nasm -f elf $1 -o $OUTPUT_FILE.o && echo "" # object file is created in 32 bit mode
 
 fi
 
@@ -156,7 +156,7 @@ if [ "$QEMU" == "True" ]; then # if statement is true, then QEMU will start
 
         elif [ "$BITS" == "False" ]; then # if BITS is false, then QEMU will execute program in 32 bit mode
 
-                qemu-i386 $OUTPUT_FILE && echo "" # QEMU runs the program
+                qemu-x86_32 $OUTPUT_FILE && echo "" # QEMU runs the program
 
         fi
 
