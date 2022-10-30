@@ -16,11 +16,11 @@ if [ $# -lt 1 ]; then # if no option is selected the user guide is printed
         echo "-b | --break <break point>    Add breakpoint after running gdb. Default is _start."
         echo "-r | --run                    Run program in gdb automatically. Same as run command inside gdb env."
         echo "-q | --qemu                   Run executable in QEMU emulator. This will execute the program."
-        echo "-32| --x86-32                 Compile for 32bit (x86-32) system."
+        echo "-32| --x86-32                 Compile for 32bit (x86-32) system." # only compile 32bit not 64bit
         echo "-o | --output <filename>      Output filename."
 
         exit 1 # after printing the guide the program will exit
-fi # closes the above if statement
+fi # allows shell to make decision and execute statement conditionally
 
 # setting default parameters
 GDB=False
@@ -31,7 +31,7 @@ QEMU=False
 BREAK="_start"
 RUN=False
 
-# Use getopt to parse command line options. Can be -(short) and/or --(long).
+# Use getopt to parse command line options. Can be -(short) and/or --(long). It retrives options from a list of parameters.
 options=$(getopt -o go:v3qrb: --long gdb,output:,verbose,x86-32,qemu,run,break: -- "$@")
 
 # Set positional parameters to the result from getopt.
@@ -40,11 +40,11 @@ eval set -- "$options"
 # Loop through positional paramters.
 while [[ $# -gt 0 ]]; do # while statement is executed if user enters an argument
         case $1 in # checking different cases below to find a match with the command entered by user 
-                -g|--gdb) # if -g is entered, then GDB is set to true 
+                -g|--gdb) # if -g is entered, then GDB is set to true and gdb command run on executable
                         GDB=True
-                        shift # past argument
+                        shift # past argument, move the command line arguments to one position left
                         ;;
-                -o|--output) # if -o is entered, then user will enter a file name or another argument
+                -o|--output) # if -o is entered, then user will enter a file name 
                         OUTPUT_FILE="$2" # OUTPUT_FILE variable will store the file name entered
                         shift # past argument
                         shift # past value
@@ -54,10 +54,10 @@ while [[ $# -gt 0 ]]; do # while statement is executed if user enters an argumen
                         shift # past argument
                         ;;
                 -3|--x86-32) # Getopt only takes one char for short commands (-32 will no longer work).
-                        BITS=False
+                        BITS=False # It only takes x86-32
                         shift # past argument
                         ;;
-                -q|--qemu) # if -q is entered, then QEMU is set true
+                -q|--qemu) # if -q is entered, then QEMU is set true, run the program
                         QEMU=True
                         shift # past argument
                         ;;
@@ -65,7 +65,7 @@ while [[ $# -gt 0 ]]; do # while statement is executed if user enters an argumen
                         RUN=True
                         shift # past argument
                         ;;
-                -b|--break) # if -b is entered, then user will enter another argument to specify breakthrough point
+                -b|--break) # if -b is entered, then user will enter another argument to specify breakthrough point, execution to resume after the end of the nearest enclosing while
                         BREAK="$2" # breakthrough point will be saved in BREAK
                         shift # past argument
                         shift # past value
@@ -78,7 +78,7 @@ while [[ $# -gt 0 ]]; do # while statement is executed if user enters an argumen
                         echo "Option $1 is invalid"
                         shift # past argument
                         ;;
-        esac # ends the above case statement
+        esac # execute different statements based on expression
 done # ends the while loop
 
 # Use original args that were not modified by getopt.
@@ -102,7 +102,7 @@ if [ "$VERBOSE" == "True" ]; then # if the statement is true, then VERBOSE will 
         echo "  Input File = $INPUT_FILE"
         echo "  Output File = $OUTPUT_FILE"
         echo "  Verbose = $VERBOSE"
-        echo "  64 bit mode = $BITS" 
+        echo "  64 bit mode = $BITS" # execute in 64bit mode
         echo ""
 
         echo "NASM started..."
@@ -111,12 +111,12 @@ fi
 
 if [ "$BITS" == "True" ]; then # if BITS is true, then nasm will compile the file in 64 bit mode
 
-        nasm -f elf64 $1 -o $OUTPUT_FILE.o && echo "" # object file is created
+        nasm -f elf64 $1 -o $OUTPUT_FILE.o && echo "" # object file is created in 64 bit mode
 
 
 elif [ "$BITS" == "False" ]; then # if BITS is false, then nasm will compile file in 32 bit mode
 
-        nasm -f elf $1 -o $OUTPUT_FILE.o && echo "" # object file is created
+        nasm -f elf $1 -o $OUTPUT_FILE.o && echo "" # object file is created in 32 bit mode
 
 fi
 
@@ -129,7 +129,7 @@ fi
 
 if [ "$BITS" == "True" ]; then # if BITS is true, then gcc will compile the file in 64 bit mode
 
-        gcc -m64 -nostdlib $OUTPUT_FILE.o -o $OUTPUT_FILE && echo "" # an executable file is created
+        gcc -m64 -nostdlib $OUTPUT_FILE.o -o $OUTPUT_FILE && echo "" # an executable file is created in 64 bit mode
 
 
 elif [ "$BITS" == "False" ]; then # if BITS is false, then gcc will compile the file in 32 bit mode
@@ -145,7 +145,7 @@ if [ "$VERBOSE" == "True" ]; then
 
 fi
 
-if [ "$QEMU" == "True" ]; then # if statement is true, then QEMU will start
+if [ "$QEMU" == "True" ]; then # if statement is true, then QEMU will start and run the program
 
         echo "Starting QEMU ..."
         echo ""
@@ -156,11 +156,11 @@ if [ "$QEMU" == "True" ]; then # if statement is true, then QEMU will start
 
         elif [ "$BITS" == "False" ]; then # if BITS is false, then QEMU will execute program in 32 bit mode
 
-                qemu-i386 $OUTPUT_FILE && echo "" # QEMU runs the program
+                qemu-i386_32 $OUTPUT_FILE && echo "" # QEMU runs the program
 
         fi
 
-        exit 0
+        exit 0 # command was successful without any error
 
 fi
 
