@@ -16,22 +16,22 @@ if [ $# -lt 1 ]; then # if no option is selected the user guide is printed
         echo "-b | --break <break point>    Add breakpoint after running gdb. Default is _start."
         echo "-r | --run                    Run program in gdb automatically. Same as run command inside gdb env."
         echo "-q | --qemu                   Run executable in QEMU emulator. This will execute the program."
-        echo "-32| --x86-32                 Compile for 32bit (x86-32) system." # only compile 32bit not 64bit
+        echo "-64| --x86-64                 Compile for 64bit (x86-64) system." 
         echo "-o | --output <filename>      Output filename."
 
         exit 1 # after printing the guide the program will exit
-fi # allows shell to make decision and execute statement conditionally
+fi # allows shell to make decisions and execute
 
 # setting default parameters
 GDB=False
 OUTPUT_FILE=""
 VERBOSE=False
-BITS=True
+BITS=True # 6bit mode
 QEMU=False
 BREAK="_start"
 RUN=False
 
-# Use getopt to parse command line options. Can be -(short) and/or --(long). It retrives options from a list of parameters.
+# Use getopt to parse command line options. Can be -(short) and/or --(long).It retrives options from a list parameters
 options=$(getopt -o go:v3qrb: --long gdb,output:,verbose,x86-32,qemu,run,break: -- "$@")
 
 # Set positional parameters to the result from getopt.
@@ -42,7 +42,7 @@ while [[ $# -gt 0 ]]; do # while statement is executed if user enters an argumen
         case $1 in # checking different cases below to find a match with the command entered by user 
                 -g|--gdb) # if -g is entered, then GDB is set to true and gdb command run on executable
                         GDB=True
-                        shift # past argument, move the command line arguments to one position left
+                        shift # past argument, move arguments to left position
                         ;;
                 -o|--output) # if -o is entered, then user will enter a file name 
                         OUTPUT_FILE="$2" # OUTPUT_FILE variable will store the file name entered
@@ -65,7 +65,7 @@ while [[ $# -gt 0 ]]; do # while statement is executed if user enters an argumen
                         RUN=True
                         shift # past argument
                         ;;
-                -b|--break) # if -b is entered, then user will enter another argument to specify breakthrough point, execution to resume after the end of the nearest enclosing while
+                -b|--break) # if -b is entered,  execution to resume after the end of the nearest enclosing while
                         BREAK="$2" # breakthrough point will be saved in BREAK
                         shift # past argument
                         shift # past value
@@ -116,7 +116,7 @@ if [ "$BITS" == "True" ]; then # if BITS is true, then nasm will compile the fil
 
 elif [ "$BITS" == "False" ]; then # if BITS is false, then nasm will compile file in 32 bit mode
 
-        nasm -f elf $1 -o $OUTPUT_FILE.o && echo "" # object file is created in 32 bit mode
+        nasm -f elf32 $1 -o $OUTPUT_FILE.o && echo "" # object file is created in 32 bit mode
 
 fi
 
